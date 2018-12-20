@@ -71,6 +71,26 @@ and their arguments:
   - `emote: String`: the emote to change to. 
   No defaults.
   Invalid emotes are displayed as a 'missingno' as with pre-2.7.
+  - `anim: String`: the name of the animation that should play once,
+  without looping, before the emote itself appears.
+  No defaults.
+  As with `emote`, invalid animations are to be displayed as a
+  "missigno", and be considered immediately finished, having no actual
+  animation.
+  This can be used to ignore this value.
+  - `stall: bool`: if `true`, the client should not continue
+  interpreting the IC message further until the animation has played
+  completely.
+  If `true`, and the animation does not finish by the time the IC
+  message is over, the IC message is nevertheless considered finished,
+  and a new one may be interpreted.
+  If `false`, play the animation, but continue interpreting the IC
+  message. If need be, default to the last defined `emote`.
+  If `false`, and the animation is playing, and a new `"emote"` is
+  defined before the animation has finished, switch to the new one.
+
+  With one exception (see below), **this must be the first `ICPiece`
+  in an IC message.**
 - `"text"`
   - `text: String`: the text to insert into the message, that will be
   displayed in the message box. 
@@ -115,27 +135,6 @@ and their arguments:
   If the input given is invalid, the `ICPiece` should be pruned.
   If no `"text"` `ICPiece` appears after this piece, it should be 
   pruned from the IC message.
-- `"pre"`
-  - `anim: String`: the name of the animation that should play once,
-  without looping. 
-  No defaults.
-  As with `"emote"`, invalid animations are to be displayed as a
-  "missigno", and be considered immediately finished, having no actual
-  animation.
-  - `stall: bool`: if `true`, the client should not continue
-  interpreting the IC message further until the animation has played
-  completely.
-  If `true`, and the animation does not finish by the time the IC
-  message is over, the IC message is nevertheless considered finished,
-  and a new one may be interpreted.
-  If `false`, play the animation, but continue interpreting the IC
-  message. If need finished, default to the last defined `"emote"`.
-  If `false`, and the animation is playing, and a new `"emote"` or
-  `"pre"` is defined before the animation has finished, switch to the
-  new one.
-
-  This `ICPiece` is in essence the same as non-interrupting and
-  interrupting preanims in pre-2.7.
 - `"delay"`
   - `time: int`: the client should wait this much in miliseconds 
   before continuing to interpet the IC message.
@@ -154,7 +153,7 @@ and their arguments:
 - `"sfx"`
   - `sound: String`: the name of the sound file that should be played.
   No defaults.
-  Some other `ICPiece`s, like `"emote"` or `"pre"` can play their
+  Some other `ICPiece`s, like `"emote"` or `"bling"` can play their
   own sound effects independently.
 - `"flip"`
   - `flip: bool`: if `true`, the character will appear horizontally 
@@ -173,6 +172,11 @@ and their arguments:
   The above rule makes this piece the only one that can be "wasted",
   that is, cannot be pruned serverside and not have it count against
   the complexity of the message.
+
+  Furthermore, this is the only `ICPiece` that **can appear as the first `ICPiece` in an IC message** besides `"emote"`, but only if an `"emote"` immediately follows it.
+  In this case, the "camera" is not moved away from the previous
+  character on screen, to replicate that "object-into-your-face"
+  feeling the original series, and pre-2.7 has with its interjections.
 - `"evi"`
   - `id: int`: the ID of the evidence the user wants to present.
 
@@ -196,7 +200,8 @@ possible to have multiple of the same command in one IC message:
 	[
 		"IC",
 		{
-			"header": "pre",
+			"header": "emote",
+			"emote": "handsondesk",
 			"anim": "slam",
 			"stall": false
 		},
@@ -213,7 +218,8 @@ possible to have multiple of the same command in one IC message:
 			"text": "The true culprit of this crime is "
 		},
 		{
-			"header": "pre",
+			"header": "emote",
+			"emote": "pointing",
 			"anim": "point",
 			"stall": true
 		},
@@ -237,8 +243,8 @@ insert three different kinds of text, and employ various other
 roleplay enhancing techniques all in one message.
 
 Though it looks spacious, that is due to human readability. For
-curiousity, the snippet above, as it is, is 437 bytes, but would be
-245 bytes in MessagePack itself.   
+curiousity, the snippet above, as it is, is 490 bytes, but would be
+282 bytes in MessagePack itself.   
 This is, of course, assuming we intend to translate a JSON document
 like above, intend to keep all its indents, and the final bytesize
 also counts the names of the arguments themselves, like `"header"` or
@@ -248,11 +254,11 @@ the structure or object.)
 Assuming we do not do the above, we roughly get:
 
 ```json
-	["IC","pre","slam",false,"text","Your Honour! ","delay",1500,"text","The true culprit of this crime is ", "pre","point",true,"color_theme",2,"text","this person!","evi",23]
+	["IC","emote","handsondesk","slam",false,"text","Your Honour! ","delay",1500,"text","The true culprit of this crime is ","emote","pointing","point",true,"color_theme",2,"text","this person!","evi",23]
 ```
 
-The above message is 172 bytes in JSON, and it after encoding, it
-is shrunken to 132 bytes.
+The above message is 200 bytes in JSON, and it after encoding, it
+is shrunken to 157 bytes.
 
 Compare and contrast a similar message from 2.6, though albeit
 with different arguments, which ends up at 141 bytes for less
