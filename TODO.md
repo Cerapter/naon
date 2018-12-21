@@ -1,0 +1,75 @@
+**TODO:**
+
+- Fixes
+  - [ ] IC offset
+  - [ ] IC present user profile
+  - [ ] IC present profile
+- Technical
+  - [ ] Handshake (client program, program version, compatible vanilla version)
+  - [ ] Send basic info about server (name, description, player count, maximum players, protection)
+    - Protection: Open, password or spectate, password
+  - [ ] Join server ()
+  - [ ] Server join result (result, message)
+  - [ ] Disconnect client by server (message)
+  - [ ] Request asset list lengths ()
+  - [ ] Get asset list lengths (charlist, music list) 
+  - [ ] Request characters
+  - [ ] Get characters (Array(names))
+  - [ ] Request music
+  - [ ] Get music (Array(names))
+  - [ ] Request character availability ()
+  - [ ] Get character availability (Array(bool))
+  - [ ] Keepalive ()
+  - [ ] Call moderator (message)
+- User profiles
+  - [ ] Set user profile (OOC name, description, charid)
+  - [ ] Get user profiles (Array(id, OOC name, description, charid))
+- Game manipulation
+  - [ ] Request change character (charid)
+  - [ ] Force change character (charid)
+  - [ ] Change background (name, fade to black, clear screen)
+  - [ ] Send pair up request (other id)
+  - [ ] Get pair up request (other id)
+  - [ ] Get list of pairs (Array(id, other id))
+- Areas
+  - [ ] Get list of areas (Array(Area))
+    - Area (id, name, description, playercount, status, owners, protection, parent area)
+      - Protection: open, spectate only, closed
+  - [ ] Claim area ()
+  - [ ] Give up area ()
+  - [ ] Add someone as an additional CM (other id)
+  - [ ] Edit area (name, description, status, protection)
+  - [ ] Join an area (id)
+- Casing
+  - Evidence
+    - [ ] Add evidence (name, description, image, type, role)
+      - Type: Evidence, profile
+      - Role: all, CM, defence, prosecution, judge, witness, jury
+    - [ ] Remove evidence (id)
+    - [ ] Edit evidence (id, name, description, image, type, role)
+    - [ ] Get list of evidence (Array(Evidence))
+      - Evidence (id, name, description, image, type, role)
+  - CM actions
+    - [ ] Set case in area (title, description)
+    - [ ] Get case in area (title, description)
+    - [ ] Start case (timer)
+    - [ ] Pause case ()
+    - [ ] End case ()
+    - [ ] Add user to a role (id, role)
+    - [ ] Remove user from a role (id, role)
+    - [ ] Case in progress (true/false)
+  - Judge actions
+    - [ ] Warn = flash penalty bar (side, value)
+    - [ ] Penalise (side, value)
+    - [ ] Strike evidence from Court Record (id)
+    - [ ] Allow evidence back into Court Record (id)
+    - [ ] Request testimony of characters (Array(charid))
+    - [ ] Playback testimony (id)
+    - [ ] Prematurely end current testimony ()
+    - [ ] Start cross-examination (id, cross-examiner role)
+    - [ ] Prematurely end current cross-examination ()
+    - [ ] Give verdict (Verdict)
+      - Verdict: GUILTY / NOT GUILTY / MISTRIAL
+  - Juror actions
+    - [ ] Make decision (Decision)
+      - Decision: GUILTY / NOT GUILTY / UNSURE

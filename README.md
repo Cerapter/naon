@@ -98,6 +98,10 @@ and their arguments:
   An empty text `ICPiece` is not considered to exist, and should be 
   pruned from the IC message itself.
   - `center: bool`: if `true`, the message will appear centered.
+  If another `"text"` `ICPiece` appears later on, that has a `center`
+  with the opposite value, that one is ignored.
+  The first `"text"` piece determines whether the entire text is
+  centered or not.
 - `"speed"`
   - `speed: int`: the speed at which any following `"text"` `ICPiece`
   should be displayed, in percentages. 
@@ -336,7 +340,7 @@ Most commonly, these are the CMs.
 If arriving from the client, it requests that the server play a given
 song in the area.
 If the packet arrives from the server, it orders the client to play
-the song.
+the song, and loop it.
 
 This packet accepts the following arguments:
 - `name`: a String that contains the name of the song, extension
