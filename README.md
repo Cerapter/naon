@@ -248,41 +248,9 @@ Keeping the default value does not display a reason.
 
 ## Loading ##
 
-### Downloading assets: `AD` ###
+### Downloading assets ###
 
-*Client -> Server*
-*Server -> Client*
-
-#### Format: ####
-
-*From client:*
-```json
-{
-  "header": "AD"
-}
-```
-
-*From server:*
-```json
-{
-  "header": "AD",
-  "assets": [
-    IPFS hash,
-    IPFS hash,
-    IPFS hash,
-    ...
-  ]
-}
-```
-
-The client requests the IPFS hashes of all the assets the server
-demands.
-
-The length of the array `assets` also doubles as the length of the
-overall loading.
-
-After the client gets the `AD` packet, it should check if it already
-owns the given assets, and if not, download them.
+*To be decided. I'm still not sure how we plan on handling assets.*
 
 ## User profiles ##
 

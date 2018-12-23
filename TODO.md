@@ -13,7 +13,7 @@
   - [x] Disconnect client (id, message)
   - [x] Kick (id, message)
   - [x] Ban (id, message, time)
-  - [x] Request assets ()
+  - [ ] Request assets () **??????**
   - [x] Get characters (more pages, Array(IPFS hashes))
 - User profiles
   - [x] Set user profile (OOC name, description)
