@@ -284,6 +284,79 @@ overall loading.
 After the client gets the `AD` packet, it should check if it already
 owns the given assets, and if not, download them.
 
+## User profiles ##
+
+User profiles are a short little blurb of information about users,
+presented in the style of profiles like in the original *Ace Attorney*
+games.
+
+Users should be able to set up their player profiles before joining
+a server, and change it inside a server.
+
+A user profile displays the user's currently selected character,
+their preferred OOC name, and a short description of them.
+
+Users may decide to leave these fields empty, of course.
+
+User profiles can be presented like evidence or profiles in the
+*Ace Attorney* games, and this results in a notification for the user
+whose profile was presented -- somewhat similar to callwords from
+pre-2.7 in function.
+
+### Set user profie: `SUP` ###
+
+*Client -> Server*
+
+#### Format: ####
+
+```json
+  {
+    "header": "SUP",
+    "name": String,
+    "desc": String
+  }
+```
+
+Sends the user's preferred OOC name and a short description of them.
+
+Both arguments are optional. If they are left out, or left empty 
+(`""`), the server should assign the user a unique (server-wide) name,
+and the description "???".
+
+### Get user profies: `GUP` ###
+
+*Server -> Client*
+
+#### Format: ####
+
+```json
+  {
+    "header": "GUP",
+    "users": [
+      {
+        "id": int,
+        "name": String,
+        "desc": String,
+        "charid": int
+      },
+      ...
+    ]
+  }
+```
+
+Gives the client a list of user profiles from the server.    
+Can be used for both an area-wide user profile list, or a server-wide 
+user profile list.
+
+If a client gets a `GUP` packet, it should delete all previously
+stored user profiles.
+
+An `User Profile` consists of:
+- `id`: the user's ID on the server.
+- `name`: the user's OOC name.
+- `desc`: the user's description.
+- `charid`: the ID of the character the user is currently playing as.
+
 ## Messaging ##
 
 ### IC messages: `IC` ###
@@ -551,7 +624,6 @@ user's text messages (think disemvoweling and shaking).
 ```json
   {
     "header": "CT",
-    "name": String,
     "message": String
   }
 ```
@@ -566,10 +638,8 @@ user's text messages (think disemvoweling and shaking).
   }
 ```
 
-The `name` argument describes a custom, unique name chosen by the
-user.
-The name should be unique over the entire server, and may be freely
-changed at any time.
+The `name` argument describes the user's name, as given in their
+user profile.
 
 The `message` argument is a plain text String detailing what the user
 wants to say to other users.

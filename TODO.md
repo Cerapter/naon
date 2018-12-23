@@ -16,8 +16,8 @@
   - [x] Request assets ()
   - [x] Get characters (more pages, Array(IPFS hashes))
 - User profiles
-  - [ ] Set user profile (OOC name, description, charid)
-  - [ ] Get user profiles (Array(id, OOC name, description, charid))
+  - [x] Set user profile (OOC name, description)
+  - [x] Get user profiles (Array(id, OOC name, description, charid))
 - Game manipulation
   - [ ] Request change character (charid)
   - [ ] Force change character (charid)
