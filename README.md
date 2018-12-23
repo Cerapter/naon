@@ -273,7 +273,8 @@ pre-2.7 in function.
 
 ### Set user profie: `SUP` ###
 
-*Client -> Server*
+*Client -> Server*    
+*Response:* `GUP`
 
 #### Format: ####
 
@@ -639,16 +640,6 @@ Most commonly, these are the CMs.
 
 #### Format: ####
 
-*From client:*
-```json
-  {
-    "header": "MC",
-    "name": String,
-    "fade": bool
-  }
-```
-
-*From server:*
 ```json
   {
     "header": "MC",
@@ -674,9 +665,215 @@ already playing results in stopping the music.
 If `fade` was set to `true` when this was done, the music also fades
 out into silence.
 
-## Area handling ##
+## In-game ##
 
+### Change character: `CC` ###
 
+*Client -> Server*    
+*Response:* `GUP`
+
+#### Format: ####
+
+```json
+  {
+    "header": "CC",
+    "charid": int
+  }
+```
+
+The client requests that the server update its character chosen to the
+one with the given character ID in `charid`.
+
+In response, the server should give out updated user profiles, which
+contain the characters.
+
+To force specific clients into specific characters, all the server has
+to do is give out user profiles that contain the changes.
+
+### Change background: `BG` ###
+
+*Client -> Server*    
+*Server -> Client*
+
+#### Format: ####
+
+```json
+  {
+    "header": "BG",
+    "bg": String
+  }
+```
+
+If sent by the client, requests the server to change background to the
+one given by name in `bg`.
+
+If sent by the server, orders the clients to change the background
+locally to the one given in `bg`.
+
+### Pair up request: `PR` ###
+
+*Client -> Server*    
+*Server -> Client*    
+*Response:* `PL`
+
+#### Format: ####
+
+```json
+  {
+    "header": "PR",
+    "id": int
+  }
+```
+
+If sent by the client, it signals that the sending user wishes to
+pair up with the one given by `id`.
+As a consequence of this, any previous pairs are broken, even if the
+new pair never accepts the request.
+
+If sent by the server, it alerts the target client of a request to
+pair up by `id`.
+
+### Get list of pairs: `PL` ###
+
+*Server -> Client*
+
+#### Format: ####
+
+```json
+  {
+    "header": "PL",
+    "pairs": [
+      {
+        "id": int,
+        "oid": int
+      },
+      ...
+    ]
+  }
+```
+
+Returns a list of pairs, where `id` and `oid` are both user IDs.
+A pair of `{"id": 0, "oid": 1}` is equivalent to `{"id": 1, "oid": 0}`,
+that is, pairs are commutative.
+
+Getting a list of pairs should clear the list already existing on
+the client.
+
+### Check character availability: `CA` ###
+
+*Client -> Server*    
+*Server -> Client*
+
+#### Format: ####
+
+*From client:*
+```json
+  {
+    "header": "CA"
+  }
+```
+
+*From server:*
+```json
+  {
+    "header": "CA",
+    "free": [
+      bool,
+      bool,
+      bool,
+      ...
+    ]
+  }
+```
+
+If sent by the client, requests the availability list of characters.
+
+If sent by the server, it updates the client on what characters are
+available. 
+If `free` at a given index is `true`, then the character with that 
+ID is available, else it is false.
+
+### Keep alive: `CH` ###
+
+*Client -> Server*    
+*Server -> Client*
+
+#### Format: ####
+
+```json
+  {
+    "header": "CH"
+  }
+```
+
+A simple check that connection is still established.
+
+### Login as moderator: `MD` ###
+
+*Client -> Server*    
+*Server -> Client*
+
+#### Format: ####
+
+*From client:*
+```json
+  {
+    "header": "MD",
+    "pass": String
+  }
+```
+
+*From server:*
+```json
+  {
+    "header": "MD",
+    "result": int
+  }
+```
+
+If sent by the client, attempt to log in as a moderator using the
+given password in `pass`.
+
+In response, the server returns the result of the log-in attempt,
+where `result` is:
+- `0`: successful login.
+- `1`: incorrect password.
+- `2`: too many attempts.
+
+### Call moderator: `ZZ` ###
+
+*Client -> Server*    
+*Server -> Client*
+
+#### Format: ####
+
+*From client:*
+```json
+  {
+    "header": "ZZ",
+    "message": String
+  }
+```
+
+*From server:*
+```json
+  {
+    "header": "ZZ",
+    "id": int,
+    "area": int,
+    "message": String
+  }
+```
+
+If sent by the client, requests a moderator, with additional reason / 
+information if needed.
+
+`message` is optional, defaults to empty text (`""`).
+
+If sent by the server, and the current client recognises that it is
+a mod, the user will be alerted, and will be given the caller user's
+`id`, the ID of the `area` they called from, and the `message` if they
+left any.
 
 [ao2protocol]: https://github.com/AttorneyOnline/AO2Protocol/blob/master/Attorney%20Online%20Client-Server%20Network%20Specification.md
 [ao3protocol]: https://github.com/AttorneyOnline/AO3Protocol/blob/master/animated-chatroom-design.md
