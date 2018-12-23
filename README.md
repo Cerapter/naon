@@ -9,8 +9,8 @@ familiarity with the latter does not hurt, either, as the document
 takes most of its ideas from that, except fitting it to AO2 where
 possible or necessary.
 
-As it was already agreed upon, the new networking system will use 
-[MessagePack][messagepack].
+As it was already agreed upon, the new networking system will use
+Websockets, and its messages will be JSON documents.
 
 ## Legend ##
 
@@ -30,7 +30,11 @@ that identifies it.
 
 *Client -> Server*
 
+#### Format: ####
 
+```json
+
+```
 
 ## Loading ##
 
@@ -43,8 +47,16 @@ that identifies it.
 
 #### Format: ####
 
-```
-	["IC", piece: ICPiece, piece: ICPiece, ...]
+```json
+  {
+    "header": "IC",
+    "pieces": [
+      ICPiece,
+      ICPiece,
+      ICPiece,
+      ...
+    ]
+  }
 ```
 
 In AO 2.7+, IC messages would be made up of `ICPiece`s. An `ICPiece`
@@ -74,10 +86,10 @@ and their arguments:
   - `anim: String`: the name of the animation that should play once,
   without looping, before the emote itself appears.
   No defaults.
+  Optional.
   As with `emote`, invalid animations are to be displayed as a
   "missigno", and be considered immediately finished, having no actual
   animation.
-  This can be used to ignore this value.
   - `stall: bool`: if `true`, the client should not continue
   interpreting the IC message further until the animation has played
   completely.
@@ -88,6 +100,7 @@ and their arguments:
   message. If need be, default to the last defined `emote`.
   If `false`, and the animation is playing, and a new `"emote"` is
   defined before the animation has finished, switch to the new one.
+  If `anim` exists, so should this. Otherwise, it should not appear.
 
   With one exception (see below), **this must be the first `ICPiece`
   in an IC message.**
@@ -188,7 +201,15 @@ The *absolute minimum* IC message that can be legally sent is a
 message consisting of one single `"emote"` `ICPiece`. That is:
 
 ```json
-	["IC", {"header": "emote", "emote": "normal"}]
+  {
+    "header": "IC",
+    "pieces": [
+      {
+        "header": "emote",
+        "emote": "normal"
+      }
+    ]
+  }
 ```
 
 *(Of course, the actual emote called does not matter.)*
@@ -201,78 +222,54 @@ Additionally, due to how this system is set up, unlike pre-2.7, it is
 possible to have multiple of the same command in one IC message:
 
 ```json
-	[
-		"IC",
-		{
-			"header": "emote",
-			"emote": "handsondesk",
-			"anim": "slam",
-			"stall": false
-		},
-		{
-			"header": "text",
-			"text": "Your Honour! "
-		},
-		{
-			"header": "delay",
-			"time": 1500
-		},
-		{
-			"header": "text",
-			"text": "The true culprit of this crime is "
-		},
-		{
-			"header": "emote",
-			"emote": "pointing",
-			"anim": "point",
-			"stall": true
-		},
-		{
-			"header": "color_theme",
-			"color": 2
-		},
-		{
-			"header": "text",
-			"text": "this person!"
-		},
-		{
-			"header": "evi",
-			"id": 23
-		}
-	]
+  {
+    "header": "IC",
+    "pieces": [
+      {
+        "header": "emote",
+        "emote": "handsondesk",
+        "anim": "slam",
+        "stall": false
+      },
+      {
+        "header": "text",
+        "text": "Your Honour! "
+      },
+      {
+        "header": "delay",
+        "time": 1500
+      },
+      {
+        "header": "text",
+        "text": "The true culprit of this crime is "
+      },
+      {
+        "header": "emote",
+        "emote": "pointing",
+        "anim": "point",
+        "stall": true
+      },
+      {
+        "header": "color_theme",
+        "color": 2
+      },
+      {
+        "header": "text",
+        "text": "this person!"
+      },
+      {
+        "header": "evi",
+        "id": 23
+      }
+    ]
+  }
 ```
 
 In the above, the user could freely use multiple preanimations and
 insert three different kinds of text, and employ various other
 roleplay enhancing techniques all in one message.
 
-Though it looks spacious, that is due to human readability. For
-curiousity, the snippet above, as it is, is 490 bytes, but would be
-282 bytes in MessagePack itself.   
-This is, of course, assuming we intend to translate a JSON document
-like above, intend to keep all its indents, and the final bytesize
-also counts the names of the arguments themselves, like `"header"` or
-`"stall"`. (We can achieve this by calling `MSGPACK_DEFINE_MAP` in
-the structure or object.)
-
-Assuming we do not do the above, we roughly get:
-
-```json
-	["IC","emote","handsondesk","slam",false,"text","Your Honour! ","delay",1500,"text","The true culprit of this crime is ","emote","pointing","point",true,"color_theme",2,"text","this person!","evi",23]
-```
-
-The above message is 200 bytes in JSON, and it after encoding, it
-is shrunken to 157 bytes.
-
-Compare and contrast a similar message from 2.6, though albeit
-with different arguments, which ends up at 141 bytes for less
-capabilties overall.
-
-```
-	"MS#chat#pointing#ApolloDef#apollopointing#Your Honour! The culprit of the crime is this person!#def#sfx-objection#1#2#0#0#0#0#0#0##-1#0#0#%"
-```
-
-Finally, the server sends back a similarly built packet, however, it
+Further, the server sends back a similarly built packet, however, it
 may modify it in some ways.
 
 ### OOC messages: `CT` ###
@@ -283,13 +280,22 @@ may modify it in some ways.
 #### Format: ####
 
 *From client:*
-```
-	["CT", name: String, message: String]
+```json
+  {
+    "header": "CT",
+    "name": String,
+    "message": String
+  }
 ```
 
 *From server:*
-```
-	["CT", name: String, message: String, special: int]
+```json
+  {
+    "header": "CT",
+    "name": String,
+    "message": String,
+    "special": int
+  }
 ```
 
 The `name` argument describes a custom, unique name chosen by the
@@ -328,13 +334,21 @@ Most commonly, these are the CMs.
 #### Format: ####
 
 *From client:*
-```
-	["MC", name: String, fade: bool]
+```json
+  {
+    "header": "MC",
+    "name": String,
+    "fade": bool
+  }
 ```
 
 *From server:*
-```
-	["MC", name: String, fade: bool]
+```json
+  {
+    "header": "MC",
+    "name": String,
+    "fade": bool
+  }
 ```
 
 If arriving from the client, it requests that the server play a given
