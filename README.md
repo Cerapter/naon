@@ -28,15 +28,261 @@ that identifies it.
 
 ### Establishing connection: `HI` ###
 
-*Client -> Server*
+*Client -> Server*    
+*Response:* `SD`
 
 #### Format: ####
 
 ```json
-
+  {
+    "header": "HI",
+    "client": String,
+    "ver": String,
+    "vver": String
+  }
 ```
 
+The user's client introduces itself to the selected server.
+
+The `client` argument contains the name of the client the user is
+currently using.
+In Vanilla, this would be `"Attorney Online"`, but servers with custom
+clients could name them here.
+
+The `ver` argument tells the server the version of the aforementioned
+client.
+
+Finally, the `vver` tells the server which version of the Vanilla
+client is the current client most compatible with.
+
+The server can use these pieces of information to reject, approve,
+limit or warn the joining client.
+
+Implicitly, Vanilla is most compatible with itself, so in Vanilla's
+case, the two versions should be one and the same.
+
+### Send server details: `SD` ###
+
+*Server -> Client*
+
+#### Format: ####
+
+```json
+  {
+    "header": "SD",
+    "name": String,
+    "desc": String,
+    "players": int,
+    "maxplayers": int,
+    "protection": int
+  }
+```
+
+Sent in response to a `HI` packet. The server explains some basic
+details about itself.
+
+Most arguments are self-explanator, however, the `protection` argument
+can take three different values:
+- `0`: open. Anyone can join.
+- `1`: password or spectate. An user can only join as a player if they
+give the correct password. 
+However, they can choose to spectate if they do not know it.
+- `2`: password needed. The only way to join the server, player or
+spectator, is if the user knows the password.
+
+### Join server: `JS` ###
+
+*Client -> Server*    
+*Response:* `JR`
+
+#### Format: ####
+
+```json
+  {
+    "header": "JS",
+    "spectate": bool,
+    "password": String
+  }
+```
+
+The client sends a request to join the server.
+
+If `spectate` is true, the client wants to join as a spectator.
+Else, it wants to join as a player.
+
+The `password` string contains the client's guess at the server's
+password, assuming it is passworded.
+
+### Server join result: `JR` ###
+
+*Server -> Client*
+
+#### Format: ####
+
+```json
+  {
+    "header": "JR",
+    "result": int,
+    "message": String
+  }
+```
+
+Sent to the client upon an attempt the join.
+
+The `result` argument can be any of the following:
+- `0`: successful join.
+- `1`: server full.
+- `2`: spectating is not allowed.
+- `3`: wrong password.
+- `4`: banned.
+- `5`: rejected for other reasons.
+
+The `message` argument details a short message that goes alongside
+the result.
+Though only applicable with result `5`, nothing should stop the server
+from sending a message alongside any of the other results.
+
+### Disconnect: `DC` ###
+
+*Client -> Server*    
+*Server -> Client*
+
+#### Format: ####
+
+*From client:*
+```json
+{
+  "header": "DC",
+  "message": String
+}
+```
+
+*From server:*
+```json
+{
+  "header": "DC",
+  "id": int,
+  "message": String
+}
+```
+
+If sent by the client, formally closes the connection to the server,
+while giving a reason for leaving in the `message` argument.
+
+If sent by the server, it announces the disconnection of the client
+with the given ID, and their reason to leave in `message`.
+
+In both cases, `message` is optional, and will default to `"User
+disconnected"` if not specified or left empty.
+
+To actually force people to quit, see `KK` and `KB`.
+
+### Kick: `KK` ###
+
+*Client -> Server*    
+*Server -> Client*
+
+#### Format: ####
+
+*From client:*
+```json
+{
+  "header": "KK",
+  "id": int,
+  "message": String
+}
+```
+
+*From server:*
+```json
+{
+  "header": "KK",
+  "message": String
+}
+```
+
+If sent by the client, requests that the server kick the player with
+the given ID, and the reason in `message`.
+
+If sent by the server, kicks the client it is sent to.
+It should force the client to disconnect, though the server should
+make sure to cease connection as well, to avoid trickery.
+
+In both cases, `message` is option, and defaults to `""`.
+Keeping the default value does not display a reason.
+
+### Ban: `KB` ###
+
+*Client -> Server*    
+*Server -> Client*
+
+#### Format: ####
+
+*From client:*
+```json
+{
+  "header": "KB",
+  "id": int,
+  "message": String
+}
+```
+
+*From server:*
+```json
+{
+  "header": "KB",
+  "message": String
+}
+```
+
+If sent by the client, requests that the server ban the player with
+the given ID, and the reason in `message`.
+
+If sent by the server, bans the client it is sent to.
+It should force the client to disconnect, though the server should
+make sure to cease connection as well, to avoid trickery.
+Further, the server should keep the player from rejoining.
+
+In both cases, `message` is option, and defaults to `""`.
+Keeping the default value does not display a reason.
+
 ## Loading ##
+
+### Downloading assets: `AD` ###
+
+*Client -> Server*
+*Server -> Client*
+
+#### Format: ####
+
+*From client:*
+```json
+{
+  "header": "AD"
+}
+```
+
+*From server:*
+```json
+{
+  "header": "AD",
+  "assets": [
+    IPFS hash,
+    IPFS hash,
+    IPFS hash,
+    ...
+  ]
+}
+```
+
+The client requests the IPFS hashes of all the assets the server
+demands.
+
+The length of the array `assets` also doubles as the length of the
+overall loading.
+
+After the client gets the `AD` packet, it should check if it already
+owns the given assets, and if not, download them.
 
 ## Messaging ##
 
@@ -80,55 +326,55 @@ Unless specified otherwise, every argument is mandatory.
 Here is a non-exhaustive list of the possible `ICPiece` variants,
 and their arguments:
 - `"emote"`
-  - `emote: String`: the emote to change to. 
-  No defaults.
+  - `emote: String`: the emote to change to.    
+  No defaults.    
   Invalid emotes are displayed as a 'missingno' as with pre-2.7.
   - `anim: String`: the name of the animation that should play once,
-  without looping, before the emote itself appears.
-  No defaults.
-  Optional.
+  without looping, before the emote itself appears.    
+  No defaults.    
+  Optional.    
   As with `emote`, invalid animations are to be displayed as a
   "missigno", and be considered immediately finished, having no actual
   animation.
   - `stall: bool`: if `true`, the client should not continue
   interpreting the IC message further until the animation has played
-  completely.
+  completely.    
   If `true`, and the animation does not finish by the time the IC
   message is over, the IC message is nevertheless considered finished,
-  and a new one may be interpreted.
+  and a new one may be interpreted.    
   If `false`, play the animation, but continue interpreting the IC
-  message. If need be, default to the last defined `emote`.
+  message. If need be, default to the last defined `emote`.    
   If `false`, and the animation is playing, and a new `"emote"` is
-  defined before the animation has finished, switch to the new one.
+  defined before the animation has finished, switch to the new one.    
   If `anim` exists, so should this. Otherwise, it should not appear.
 
   With one exception (see below), **this must be the first `ICPiece`
   in an IC message.**
 - `"text"`
   - `text: String`: the text to insert into the message, that will be
-  displayed in the message box. 
-  No defaults. 
+  displayed in the message box.    
+  No defaults.    
   An empty text `ICPiece` is not considered to exist, and should be 
   pruned from the IC message itself.
-  - `center: bool`: if `true`, the message will appear centered.
+  - `center: bool`: if `true`, the message will appear centered.    
   If another `"text"` `ICPiece` appears later on, that has a `center`
-  with the opposite value, that one is ignored.
+  with the opposite value, that one is ignored.    
   The first `"text"` piece determines whether the entire text is
   centered or not.
 - `"speed"`
   - `speed: int`: the speed at which any following `"text"` `ICPiece`
-  should be displayed, in percentages. 
-  Defaults to `100`. 
-  Larger values imply faster speeds. 
+  should be displayed, in percentages.    
+  Defaults to `100`.    
+  Larger values imply faster speeds.    
   Sanity checks are heavily encouraged here, both on client and server
-  side. 
-  A value of `0` should be rejected outright.
+  side.    
+  A value of `0` should be rejected outright.    
   If no `"text"` `ICPiece` comes after this piece, it should be pruned
   from the IC message.
 - `"color_theme"`
   - `color: int`: the colour of any following `"text"` `ICPiece`s,
-  where the colour itself is determined by user's current theme.
-  Defaults to `0`. 
+  where the colour itself is determined by user's current theme.    
+  Defaults to `0`.    
   If no `"text"` `ICPiece` appears after this piece, it should be 
   pruned from the IC message. The acceptable values are:
     - `0`: default text colour. The default theme's white.
@@ -147,55 +393,75 @@ and their arguments:
     `"color_custom"` `ICPiece`.
 - `"color_custom"`
   - `color: String`: the colour of any following `"text"` `ICPiece`s,
-  given in hexadecimal code format.
-  No defaults.
-  If the input given is invalid, the `ICPiece` should be pruned.
+  given in hexadecimal code format.    
+  No defaults.    
+  If the input given is invalid, the `ICPiece` should be pruned.    
   If no `"text"` `ICPiece` appears after this piece, it should be 
   pruned from the IC message.
 - `"delay"`
   - `time: int`: the client should wait this much in miliseconds 
-  before continuing to interpet the IC message.
-  No defaults.
-  Cannot be `0` or negative.
+  before continuing to interpet the IC message.    
+  No defaults.    
+  Cannot be `0` or negative.    
   At least the server should do sanity checks here.
 - `"shake"`
   - `intensity: int`: the intensity with which the screen should
-  shake, ranging from `1` to `5`. These values are mostly arbitrary,
-  and their actual strength depends on the client's implementation.
+  shake, ranging from `1` to `5`.    
+  These values are mostly arbitrary, and their actual strength 
+  depends on the client's implementation.    
   No defaults.
 - `"bling"`
 
-  No arguments.
+  No arguments.    
   Equivalent to the *realisation* of pre-2.7.
 - `"sfx"`
-  - `sound: String`: the name of the sound file that should be played.
-  No defaults.
+  - `sound: String`: the name of the sound file that should be played.    
+  No defaults.    
   Some other `ICPiece`s, like `"emote"` or `"bling"` can play their
   own sound effects independently.
 - `"flip"`
   - `flip: bool`: if `true`, the character will appear horizontally 
-  flipped. If `false`, it will appear unflipped.
+  flipped.     
+  If `false`, it will appear unflipped.    
+  Defaults to `false`.
+- `"offset"`
+  - `offset: int`: A value from `-100` to `100` that determines how
+  far off the user's sprite will appear from its default location, in
+  percentages.    
+  A value of `-100` is 100% to the left, that is, one whole viewport
+  to the left, and a value of `100` is 100% to the right, or one whole
+  viewport to the right.    
+  Defaults to `0`.
+  - `snap: bool`: If `true`, the character instantly appears at the
+  new offset.     
+  If `false`, then the character is translated over there over a short
+  amount of time.    
+  Defaults to `true`.
 - `"shout"`
   - `files: String`: the name of both the interjection animated image 
-  and sound file that should happen.
-  No defaults.
+  and sound file that should happen.    
+  No defaults.    
   If the character's folder does not have the sound effect or animated
   image to play, the client can fall back to one set by the theme, or 
-  some other default.
+  some other default.    
   If the sound effect still cannot be found this way, the game should
-  fall back to the interjection whoosh sound effect.
-  If that cannot be found, do not play any sound.
-  If the animated image cannot be found, ignore this piece.
+  fall back to the interjection whoosh sound effect.    
+  If that cannot be found, do not play any sound.    
+  If the animated image cannot be found, ignore this piece.    
   The above rule makes this piece the only one that can be "wasted",
   that is, cannot be pruned serverside and not have it count against
   the complexity of the message.
 
-  Furthermore, this is the only `ICPiece` that **can appear as the first `ICPiece` in an IC message** besides `"emote"`, but only if an `"emote"` immediately follows it.
+  Furthermore, this is the only `ICPiece` that **can appear as the first `ICPiece` in an IC message** besides `"emote"`, but only if an `"emote"` immediately follows it.    
   In this case, the "camera" is not moved away from the previous
   character on screen, to replicate that "object-into-your-face"
   feeling the original series, and pre-2.7 has with its interjections.
 - `"evi"`
   - `id: int`: the ID of the evidence the user wants to present.
+- `"user"`
+  - `id: int`: presents the user profile of an user, and by doing so,
+  giving them a notification as well, that they were mentioned.
+  Somewhat equivalent of using *callwords* in pre-2.7.
 
 The *absolute minimum* IC message that can be legally sent is a
 message consisting of one single `"emote"` `ICPiece`. That is:
@@ -271,6 +537,8 @@ roleplay enhancing techniques all in one message.
 
 Further, the server sends back a similarly built packet, however, it
 may modify it in some ways.
+For example, some servers may filter out delays, or play jokes on the
+user's text messages (think disemvoweling and shaking).
 
 ### OOC messages: `CT` ###
 

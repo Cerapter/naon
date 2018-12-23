@@ -1,26 +1,20 @@
 **TODO:**
 
 - Fixes
-  - [ ] IC offset
-  - [ ] IC present user profile
-  - [ ] IC present profile
+  - [x] IC offset
+  - [x] IC present user profile
+  - [x] IC present profile
 - Technical
-  - [ ] Handshake (client program, program version, compatible vanilla version)
-  - [ ] Send basic info about server (name, description, player count, maximum players, protection)
+  - [x] Handshake (client program, program version, compatible vanilla version)
+  - [x] Send basic info about server (name, description, player count, maximum players, protection)
     - Protection: Open, password or spectate, password
-  - [ ] Join server ()
-  - [ ] Server join result (result, message)
-  - [ ] Disconnect client by server (message)
-  - [ ] Request asset list lengths ()
-  - [ ] Get asset list lengths (charlist, music list) 
-  - [ ] Request characters
-  - [ ] Get characters (Array(names))
-  - [ ] Request music
-  - [ ] Get music (Array(names))
-  - [ ] Request character availability ()
-  - [ ] Get character availability (Array(bool))
-  - [ ] Keepalive ()
-  - [ ] Call moderator (message)
+  - [x] Join server (spectate, password)
+  - [x] Server join result (result, message)
+  - [x] Disconnect client (id, message)
+  - [x] Kick (id, message)
+  - [x] Ban (id, message, time)
+  - [x] Request assets ()
+  - [x] Get characters (more pages, Array(IPFS hashes))
 - User profiles
   - [ ] Set user profile (OOC name, description, charid)
   - [ ] Get user profiles (Array(id, OOC name, description, charid))
@@ -31,6 +25,10 @@
   - [ ] Send pair up request (other id)
   - [ ] Get pair up request (other id)
   - [ ] Get list of pairs (Array(id, other id))
+  - [ ] Request character availability ()
+  - [ ] Get character availability (Array(bool))
+  - [ ] Keepalive ()
+  - [ ] Call moderator (message)
 - Areas
   - [ ] Get list of areas (Array(Area))
     - Area (id, name, description, playercount, status, owners, protection, parent area)
