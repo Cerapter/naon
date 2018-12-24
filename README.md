@@ -57,6 +57,10 @@ before it.
 By default, every packet should begin with a *header:* a short string
 that identifies it.
 
+Further, it should be noted that while in this document, the pieces of
+code are in TypeScript, this is only for easier readability -- the
+networking itself should JSON, as it has been said before.
+
 [*Back to TOC*](#user-content-table-of-contents)
 
 ## Handshake ##
@@ -70,12 +74,12 @@ that identifies it.
 
 #### Format: ####
 
-```json
+```typescript
   {
-    "header": "HI",
-    "client": String,
-    "ver": String,
-    "vver": String
+    header: "HI",
+    client: String,
+    ver: String,
+    vver: String
   }
 ```
 
@@ -106,14 +110,14 @@ case, the two versions should be one and the same.
 
 #### Format: ####
 
-```json
+```typescript
   {
-    "header": "SD",
-    "name": String,
-    "desc": String,
-    "players": int,
-    "maxplayers": int,
-    "protection": int
+    header: "SD",
+    name: String,
+    desc: String,
+    players: Number,
+    maxplayers: Number,
+    protection: Number
   }
 ```
 
@@ -138,11 +142,11 @@ spectator, is if the user knows the password.
 
 #### Format: ####
 
-```json
+```typescript
   {
-    "header": "JS",
-    "spectate": bool,
-    "password": String
+    header: "JS",
+    spectate: Boolean,
+    password: String
   }
 ```
 
@@ -162,11 +166,11 @@ password, assuming it is passworded.
 
 #### Format: ####
 
-```json
+```typescript
   {
-    "header": "JR",
-    "result": int,
-    "message": String
+    header: "JR",
+    result: Number,
+    message: String
   }
 ```
 
@@ -195,19 +199,19 @@ from sending a message alongside any of the other results.
 #### Format: ####
 
 *From client:*
-```json
+```typescript
 {
-  "header": "DC",
-  "message": String
+  header: "DC",
+  message: String
 }
 ```
 
 *From server:*
-```json
+```typescript
 {
-  "header": "DC",
-  "id": int,
-  "message": String
+  header: "DC",
+  id: Number,
+  message: String
 }
 ```
 
@@ -232,19 +236,19 @@ To actually force people to quit, see `KK` and `KB`.
 #### Format: ####
 
 *From client:*
-```json
+```typescript
 {
-  "header": "KK",
-  "id": int,
-  "message": String
+  header: "KK",
+  id: Number,
+  message: String
 }
 ```
 
 *From server:*
-```json
+```typescript
 {
-  "header": "KK",
-  "message": String
+  header: "KK",
+  message: String
 }
 ```
 
@@ -268,19 +272,19 @@ Keeping the default value does not display a reason.
 #### Format: ####
 
 *From client:*
-```json
+```typescript
 {
-  "header": "KB",
-  "id": int,
-  "message": String
+  header: "KB",
+  id: Number,
+  message: String
 }
 ```
 
 *From server:*
-```json
+```typescript
 {
-  "header": "KB",
-  "message": String
+  header: "KB",
+  message: String
 }
 ```
 
@@ -335,11 +339,11 @@ pre-2.7 in function.
 
 #### Format: ####
 
-```json
+```typescript
   {
-    "header": "SUP",
-    "name": String,
-    "desc": String
+    header: "SUP",
+    name: String,
+    desc: String
   }
 ```
 
@@ -357,15 +361,15 @@ and the description "???".
 
 #### Format: ####
 
-```json
+```typescript
   {
-    "header": "GUP",
-    "users": [
+    header: "GUP",
+    users: [
       {
-        "id": int,
-        "name": String,
-        "desc": String,
-        "charid": int
+        id: Number,
+        name: String,
+        desc: String,
+        charid: Number
       },
       ...
     ]
@@ -398,10 +402,10 @@ An `User Profile` consists of:
 
 #### Format: ####
 
-```json
+```typescript
   {
-    "header": "IC",
-    "pieces": [
+    header: "IC",
+    pieces: [
       ICPiece,
       ICPiece,
       ICPiece,
@@ -441,7 +445,7 @@ and their arguments:
   As with `emote`, invalid animations are to be displayed as a
   "missigno", and be considered immediately finished, having no actual
   animation.
-  - `stall: bool`: if `true`, the client should not continue
+  - `stall: Boolean`: if `true`, the client should not continue
   interpreting the IC message further until the animation has played
   completely.    
   If `true`, and the animation does not finish by the time the IC
@@ -461,13 +465,13 @@ and their arguments:
   No defaults.    
   An empty text `ICPiece` is not considered to exist, and should be 
   pruned from the IC message itself.
-  - `center: bool`: if `true`, the message will appear centered.    
+  - `center: Boolean`: if `true`, the message will appear centered.    
   If another `"text"` `ICPiece` appears later on, that has a `center`
   with the opposite value, that one is ignored.    
   The first `"text"` piece determines whether the entire text is
   centered or not.
 - `"speed"`
-  - `speed: int`: the speed at which any following `"text"` `ICPiece`
+  - `speed: Number`: the speed at which any following `"text"` `ICPiece`
   should be displayed, in percentages.    
   Defaults to `100`.    
   Larger values imply faster speeds.    
@@ -477,7 +481,7 @@ and their arguments:
   If no `"text"` `ICPiece` comes after this piece, it should be pruned
   from the IC message.
 - `"color_theme"`
-  - `color: int`: the colour of any following `"text"` `ICPiece`s,
+  - `color: Number`: the colour of any following `"text"` `ICPiece`s,
   where the colour itself is determined by user's current theme.    
   Defaults to `0`.    
   If no `"text"` `ICPiece` appears after this piece, it should be 
@@ -504,13 +508,13 @@ and their arguments:
   If no `"text"` `ICPiece` appears after this piece, it should be 
   pruned from the IC message.
 - `"delay"`
-  - `time: int`: the client should wait this much in miliseconds 
+  - `time: Number`: the client should wait this much in miliseconds 
   before continuing to interpet the IC message.    
   No defaults.    
   Cannot be `0` or negative.    
   At least the server should do sanity checks here.
 - `"shake"`
-  - `intensity: int`: the intensity with which the screen should
+  - `intensity: Number`: the intensity with which the screen should
   shake, ranging from `1` to `5`.    
   These values are mostly arbitrary, and their actual strength 
   depends on the client's implementation.    
@@ -525,19 +529,19 @@ and their arguments:
   Some other `ICPiece`s, like `"emote"` or `"bling"` can play their
   own sound effects independently.
 - `"flip"`
-  - `flip: bool`: if `true`, the character will appear horizontally 
+  - `flip: Boolean`: if `true`, the character will appear horizontally 
   flipped.     
   If `false`, it will appear unflipped.    
   Defaults to `false`.
 - `"offset"`
-  - `offset: int`: A value from `-100` to `100` that determines how
+  - `offset: Number`: A value from `-100` to `100` that determines how
   far off the user's sprite will appear from its default location, in
   percentages.    
   A value of `-100` is 100% to the left, that is, one whole viewport
   to the left, and a value of `100` is 100% to the right, or one whole
   viewport to the right.    
   Defaults to `0`.
-  - `snap: bool`: If `true`, the character instantly appears at the
+  - `snap: Boolean`: If `true`, the character instantly appears at the
   new offset.     
   If `false`, then the character is translated over there over a short
   amount of time.    
@@ -562,22 +566,22 @@ and their arguments:
   character on screen, to replicate that "object-into-your-face"
   feeling the original series, and pre-2.7 has with its interjections.
 - `"evi"`
-  - `id: int`: the ID of the evidence the user wants to present.
+  - `id: Number`: the ID of the evidence the user wants to present.
 - `"user"`
-  - `id: int`: presents the user profile of an user, and by doing so,
+  - `id: Number`: presents the user profile of an user, and by doing so,
   giving them a notification as well, that they were mentioned.
   Somewhat equivalent of using *callwords* in pre-2.7.
 
 The *absolute minimum* IC message that can be legally sent is a
 message consisting of one single `"emote"` `ICPiece`. That is:
 
-```json
+```typescript
   {
-    "header": "IC",
-    "pieces": [
+    header: "IC",
+    pieces: [
       {
-        "header": "emote",
-        "emote": "normal"
+        header: "emote",
+        emote: "normal"
       }
     ]
   }
@@ -592,45 +596,45 @@ realisation or interjections.
 Additionally, due to how this system is set up, unlike pre-2.7, it is
 possible to have multiple of the same command in one IC message:
 
-```json
+```typescript
   {
-    "header": "IC",
-    "pieces": [
+    header: "IC",
+    pieces: [
       {
-        "header": "emote",
-        "emote": "handsondesk",
-        "anim": "slam",
-        "stall": false
+        header: "emote",
+        emote: "handsondesk",
+        anim: "slam",
+        stall: false
       },
       {
-        "header": "text",
-        "text": "Your Honour! "
+        header: "text",
+        text: "Your Honour! "
       },
       {
-        "header": "delay",
-        "time": 1500
+        header: "delay",
+        time: 1500
       },
       {
-        "header": "text",
-        "text": "The true culprit of this crime is "
+        header: "text",
+        text: "The true culprit of this crime is "
       },
       {
-        "header": "emote",
-        "emote": "pointing",
-        "anim": "point",
-        "stall": true
+        header: "emote",
+        emote: "pointing",
+        anim: "point",
+        stall: true
       },
       {
-        "header": "color_theme",
-        "color": 2
+        header: "color_theme",
+        color: 2
       },
       {
-        "header": "text",
-        "text": "this person!"
+        header: "text",
+        text: "this person!"
       },
       {
-        "header": "evi",
-        "id": 23
+        header: "evi",
+        id: 23
       }
     ]
   }
@@ -655,20 +659,20 @@ user's text messages (think disemvoweling and shaking).
 #### Format: ####
 
 *From client:*
-```json
+```typescript
   {
-    "header": "CT",
-    "message": String
+    header: "CT",
+    message: String
   }
 ```
 
 *From server:*
-```json
+```typescript
   {
-    "header": "CT",
-    "name": String,
-    "message": String,
-    "special": int
+    header: "CT",
+    name: String,
+    message: String,
+    special: Number
   }
 ```
 
@@ -711,10 +715,10 @@ Most commonly, these are the CMs.
 
 #### Format: ####
 
-```json
+```typescript
   {
-    "header": "CC",
-    "charid": int
+    header: "CC",
+    charid: Number
   }
 ```
 
@@ -736,11 +740,11 @@ to do is give out user profiles that contain the changes.
 
 #### Format: ####
 
-```json
+```typescript
   {
-    "header": "MC",
-    "name": String,
-    "fade": bool
+    header: "MC",
+    name: String,
+    fade: Boolean
   }
 ```
 
@@ -770,10 +774,10 @@ out into silence.
 
 #### Format: ####
 
-```json
+```typescript
   {
-    "header": "BG",
-    "bg": String
+    header: "BG",
+    bg: String
   }
 ```
 
@@ -793,10 +797,10 @@ locally to the one given in `bg`.
 
 #### Format: ####
 
-```json
+```typescript
   {
-    "header": "PR",
-    "id": int
+    header: "PR",
+    id: Number
   }
 ```
 
@@ -816,13 +820,13 @@ pair up by `id`.
 
 #### Format: ####
 
-```json
+```typescript
   {
-    "header": "PL",
-    "pairs": [
+    header: "PL",
+    pairs: [
       {
-        "id": int,
-        "oid": int
+        id: Number,
+        oid: Number
       },
       ...
     ]
@@ -830,7 +834,7 @@ pair up by `id`.
 ```
 
 Returns a list of pairs, where `id` and `oid` are both user IDs.
-A pair of `{"id": 0, "oid": 1}` is equivalent to `{"id": 1, "oid": 0}`,
+A pair of `{id: 0, oid: 1}` is equivalent to `{id: 1, oid: 0}`,
 that is, pairs are commutative.
 
 Getting a list of pairs should clear the list already existing on
@@ -846,20 +850,20 @@ the client.
 #### Format: ####
 
 *From client:*
-```json
+```typescript
   {
-    "header": "CA"
+    header: "CA"
   }
 ```
 
 *From server:*
-```json
+```typescript
   {
-    "header": "CA",
-    "free": [
-      bool,
-      bool,
-      bool,
+    header: "CA",
+    free: [
+      Boolean,
+      Boolean,
+      Boolean,
       ...
     ]
   }
@@ -881,9 +885,9 @@ ID is available, else it is false.
 
 #### Format: ####
 
-```json
+```typescript
   {
-    "header": "CH"
+    header: "CH"
   }
 ```
 
@@ -899,18 +903,18 @@ A simple check that connection is still established.
 #### Format: ####
 
 *From client:*
-```json
+```typescript
   {
-    "header": "MD",
-    "pass": String
+    header: "MD",
+    pass: String
   }
 ```
 
 *From server:*
-```json
+```typescript
   {
-    "header": "MD",
-    "result": int
+    header: "MD",
+    result: Number
   }
 ```
 
@@ -933,20 +937,20 @@ where `result` is:
 #### Format: ####
 
 *From client:*
-```json
+```typescript
   {
-    "header": "ZZ",
-    "message": String
+    header: "ZZ",
+    message: String
   }
 ```
 
 *From server:*
-```json
+```typescript
   {
-    "header": "ZZ",
-    "id": int,
-    "area": int,
-    "message": String
+    header: "ZZ",
+    id: Number,
+    area: Number,
+    message: String
   }
 ```
 
