@@ -119,7 +119,7 @@ case, the two versions should be one and the same.
     desc: String,
     players: Number,
     maxplayers: Number,
-    protection: Number
+    protection: 0 | 1 | 2
   }
 ```
 
@@ -172,7 +172,7 @@ password, assuming it is passworded.
 ```typescript
   {
     header: "JR",
-    result: Number,
+    result: 0 | 1 | 2 | 3 | 4 | 5,
     message: String
   }
 ```
@@ -506,7 +506,7 @@ user profile list.
 If a client gets a `GUP` packet, it should delete all previously
 stored user profiles.
 
-An `User Profile` consists of:
+A `User Profile` consists of:
 - `id`: the user's ID on the server.
 - `name`: the user's OOC name.
 - `desc`: the user's description.
@@ -795,7 +795,7 @@ user's text messages (think disemvoweling and shaking).
     header: "CT",
     name: String,
     message: String,
-    special: Number
+    special: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
   }
 ```
 
@@ -1037,7 +1037,7 @@ A simple check that connection is still established.
 ```typescript
   {
     header: "MD",
-    result: Number
+    result: 0 | 1 | 2
   }
 ```
 
