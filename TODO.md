@@ -33,14 +33,18 @@
   - [x] Become moderator (pass)
   - [x] Call moderator (message)
 - Areas
-  - [ ] Get list of areas (Array(Area))
+  - [x] Get list of areas (Array(Area))
     - Area (id, name, description, playercount, status, owners, protection, parent area)
       - Protection: open, spectate only, closed
-  - [ ] Claim area ()
-  - [ ] Give up area ()
-  - [ ] Add someone as an additional CM (other id)
-  - [ ] Edit area (name, description, status, protection)
-  - [ ] Join an area (id)
+  - [x] Claim area ()
+  - [x] Give up area ()
+  - [x] Add someone as an additional CM (other id)
+  - [x] Remove someone as a CM (other id)
+  - [x] Edit area (name, description, status, protection)
+  - [x] Join an area (id)
+  - [x] Move to area (id, success)
+  - [x] Invite to area (id)
+  - [x] Uninvite from area (id)
 - Casing
   - Evidence
     - [ ] Add evidence (name, description, image, type, role)
@@ -49,7 +53,7 @@
     - [ ] Remove evidence (id)
     - [ ] Edit evidence (id, name, description, image, type, role)
     - [ ] Get list of evidence (Array(Evidence))
-      - Evidence (id, name, description, image, type, role)
+      - Evidence (id, name, description, image, type, role, in CR)
   - CM actions
     - [ ] Set case in area (title, description)
     - [ ] Get case in area (title, description)

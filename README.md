@@ -44,6 +44,15 @@ Websockets, and its messages will be JSON documents.
   - [`CH`](#user-content-keep-alive-ch)
   - [`MD`](#user-content-login-as-moderator-md)
   - [`ZZ`](#user-content-call-moderator-zz)
+- [Area handling](#user-content-area-handling)
+  - [`GA`](#user-content-get-list-of-areas-ga)
+  - [`CM`](#user-content-become-an-owner-of-an-area-cm)
+  - [`UM`](#user-content-give-up-ownership-of-an-area-um)
+  - [`EA`](#user-content-edit-area-ea)
+  - [`JA`](#user-content-join-area-ja)
+  - [`MA`](#user-content-move-to-area-ma)
+  - [`IA`](#user-content-invite-to-area-ia)
+  - [`UA`](#user-content-uninvite-from-area-ua)
 
 ## Legend ##
 
@@ -129,7 +138,7 @@ details about itself.
 Most arguments are self-explanatory, however, the `protection` argument
 can take three different values:
 - `0`: open. Anyone can join.
-- `1`: password or spectate. An user can only join as a player if they
+- `1`: password or spectate. A user can only join as a player if they
 give the correct password. 
 However, they can choose to spectate if they do not know it.
 - `2`: password needed. The only way to join the server, player or
@@ -692,7 +701,7 @@ and their arguments:
 - `"evi"`
   - `id: Number`: the ID of the evidence the user wants to present.
 - `"user"`
-  - `id: Number`: presents the user profile of an user, and by doing so,
+  - `id: Number`: presents the user profile of a user, and by doing so,
   giving them a notification as well, that they were mentioned.
   Somewhat equivalent of using *callwords* in pre-2.7.
 
@@ -1087,6 +1096,352 @@ If sent by the server, and the current client recognises that it is
 a mod, the user will be alerted, and will be given the caller user's
 `id`, the ID of the `area` they called from, and the `message` if they
 left any.
+
+[*Back to TOC*][toc]
+
+## Area handling ##
+
+Areas, as a concept, existed for at least 2 years now in *Attorney
+Online*.    
+The following text merely makes the existence of areas official,
+in the sense that they now have their own packets, instead of relying
+on the music changing packet to travel between areas, and commands
+to get information about areas.
+
+In 2.6, a middle-ground solution was attempted, where the client
+filtered out the music list for areas, put them in their own list,
+and a special `ARUP` package updated the client on area properties.    
+This is not quite the best solution, as it makes far too many
+assumptions: that areas exist, that every server would have its areas
+in the beginning of the music list, that areas do not have extensions
+similar to music (weird, but definitely possible), and, well, that
+the server bothered to keep up with updates, and is not running a
+custom fork where updating may be harder (or perhaps, as it has
+happened before, the custom forks reimplements the feature, but
+differently).
+
+[*Back to TOC*][toc]
+
+### Get list of areas: `GA` ###
+
+*Client -> Server*    
+*Server -> Client*
+
+#### Format: ####
+
+*From client:*
+```typescript
+  {
+    header: "GA"
+  }
+```
+
+*From server:*
+```typescript
+  {
+    header: "GA",
+    areas: [
+      {
+        id: Number,
+        name: String,
+        desc: String,
+        players: Number,
+        status: String,
+        owners: [
+          Number,
+          Number,
+          Number,
+          ...
+        ],
+        protection: 0 | 1 | 2,
+        p_area: Number
+      }
+    ]
+  }
+```
+
+If sent by the client, requests the list of all areas on the server.
+
+If sent by the server, updates the client on the list of areas.
+Every item in the `areas` array describes an area.
+
+An area has the following arguments:
+- `id`: a non-negative unique integer, that allows the area to be
+referred to.
+- `name`: a short, descriptive non-empty title for the area.
+- `desc`: a longer text, that describes what the area is about.
+- `players`: a non-negative integer that shows the amount of users
+currently inside the area.
+- `status`: a short text that describes the area's status.    
+Some statuses, like `IDLE`, `CASING` and others, could be supported
+by the client more than other ones, much like in 2.6, where a few
+preset statuses got unique colouration in the area list.
+- `owners`: an array of user IDs which tells who are the CMs of a
+given area.    
+A 'CM' *(Case Maker / Case Manager)* is a user with heightened
+privileges in the area they own.
+Depending on the area's settings, this allows them to lock the area,
+be the sole modifier of evidence, change the area's status, etc.
+- `protection`: the level of protection the area currently employs.
+These are:
+  - `0`: the area is open. Anyone can enter and leave as they please.
+  - `1`: spectate only. Anyone who was not inside the area when it
+  was made spectate only can join, but can only send OOC messages.    
+  Everyone else (those who were inside the area when it was made
+  spectate only) can operate as before.    
+  Further, those who were inside the area when it was made spectate
+  only can also freely leave and come back, and retain their rights.
+  (They are considered *invited* to the area.)
+  - `2`: the area is locked. Players may enter only if:
+    - They were inside the area when it was locked, and left
+    (that is, they are still invited).
+    - They had been made a CM before the area was locked
+    (all CMs are considered invited all the time).
+    - They have special privileges (for example, they are mods).
+- `p-area`: the ID of the *parent area* of the area, if it exists.
+If it does not, this should be `-1`.    
+If Area X is a parent area of Area Y, then Area Y is a *child area*
+of Area X.
+In terms of protection levels, joining areas, etc., child areas are
+considered to be "inside" of the parent area.
+So if the parent area is locked, everyone inside the parent areas
+and its child areas can freely enter and leave the parent area, being
+all considered to be inside the parent area when it was locked.    
+If a user attempts to join a child area, they must first be eligible
+to join its parent area (and its parent area, if it exists, and so
+on).    
+Note that this does not mean that they are automatically eligible to
+join all child areas. If Area X is the parent area, and Areas Y and Z
+its children areas, and Z is locked, a user from Y can move through
+X as they please, but they cannot enter Z.    
+A CM of the parent area is implicitly the CM of all its child areas,
+and they cannot be removed from their positions as a CM of the child
+areas by other CMs of said areas.
+Besides these special restrictions, a parent area and its child areas
+are considered distinct -- so a user from a parent area will not
+hear messages from its child areas, or vice versa.
+
+[*Back to TOC*][toc]
+
+### Become an owner of an area: `CM` ###
+
+*Client -> Server*    
+*Server -> Client*    
+*Response:* `GA`
+
+#### Format: ####
+
+```typescript
+  {
+    header: "CM",
+    id: Number
+  }
+```
+
+If sent by the server, makes the given user with `id` an owner of the
+current area they are in.
+
+A user cannot become the owner of an area they are not present in
+at the time of the promotion to owner.
+
+If sent by the client, it serves two distinct purposes:
+- The client can send its own user ID, trying to claim the area,
+if possible.    
+An area can be claimed (by default) if it has no owners, or if one of
+the already existing owners CM-ed the user (see below).
+- The client can send some other user's ID, allowing them to promote
+themselves to a co-owner, if they so wish.    
+As stated above, the other user must be in the area the current user
+is for this to work.
+
+When a user is promoted to CM, a `GA` packet should be sent, to update
+the clients' knowledge of the area.
+
+[*Back to TOC*][toc]
+
+### Give up ownership of an area: `UM` ###
+
+*Client -> Server*    
+*Server -> Client*    
+*Response:* `GA`
+
+#### Format: ####
+
+```typescript
+  {
+    header: "CM",
+    id: Number
+  }
+```
+
+Forces a user with the given `id` to lose ownership of an area.
+
+Much like with the `CM` packet, a user can give its own user ID to
+willingly give up ownership of an area,
+or give some other user's ID to force them to step down.
+
+Additionally, a mod can force anyone to step down from the owner
+position.
+
+Sending this packet to the user who was demoted is purely for
+aesthetic functions (if the client adds buttons or such in regards
+to areas the user owns).    
+Like with the `CM` packet, a `GA` packet should be sent to update
+knowledge about the area.
+
+[*Back to TOC*][toc]
+
+### Edit area: `EA` ###
+
+*Client -> Server*    
+*Response:* `GA`
+
+#### Format: ####
+
+```typescript
+  {
+    header: "EA",
+    name: String,
+    desc: String,
+    status: String,
+    protection: 0 | 1 | 2
+  }
+```
+
+Edits some of the basic features of an area.
+
+It is up to the server to determine who can edit what areas.    
+Generally, it should be only allowed to CMs, and the extent of the
+edit is also dependent on the server.    
+For example, in pre-2.7, only CMs could lock or unlock areas, but
+anyone could edit the status, choosing between pre-set statuses.
+
+For explanations about the various arguments, read up on the `GA`
+packet.
+
+A `GA` packet should be sent if the edit is accepted to update
+knowledge about the area.
+
+[*Back to TOC*][toc]
+
+### Join area: `JA` ###
+
+*Client -> Server*    
+*Response:* `MA`
+
+#### Format: ####
+
+```typescript
+  {
+    header: "JA",
+    id: Number
+  }
+```
+
+Sends a request to the server that the current user wishes to join
+the area with the ID `id`.
+
+[*Back to TOC*][toc]
+
+### Move to area: `MA` ###
+
+*Server -> Client*
+
+#### Format: ####
+
+```typescript
+  {
+    header: "MA",
+    id: Number,
+    success: 0 | 1 | 2 | 3
+  }
+```
+
+Gives the client a status update about how its user moved to area
+`id`.
+
+The `success` arguments can be as follows:
+- `0`: successfully moved by the user's will.
+- `1`: the user was forcibly moved to the area.
+- `2`: the user successfully moved to the area, but has no rights to
+speak in it (because it is spectate only, for example).
+- `3`: the user could not move to the area, because it was locked.
+
+Do note that this merely gives a *status update* to the client:
+the actual moving should be done on the server's side.
+
+[*Back to TOC*][toc]
+
+### Invite to area: `IA` ###
+
+*Client -> Server*    
+*Server -> Client*
+
+#### Format: ####
+
+*From client:*
+```typescript
+  {
+    header: "IA",
+    id: Number
+  }
+```
+
+*From server:*
+```typescript
+  {
+    header: "IA",
+    id: Number,
+    area: Number
+  }
+```
+
+If sent by the client, sends out an invite to the user `id` to the
+area the client's user resides in.
+
+If sent by the server, notifies the target client's user of them being
+invited to the area with the ID `area` by the user `id`.
+
+It is up to the server to manage who can invite and when.
+
+Being invited to an area means that the user there can access all
+functions besides OOC messages (within their rights) if it is set to
+spectate only, or join and leave the area even if it is locked.
+
+An invitation is only lost if the user gets specifically uninvited,
+or if they disconnect from the server.
+
+[*Back to TOC*][toc]
+
+### Uninvite from area: `UA` ###
+
+*Client -> Server*    
+*Server -> Client*
+
+#### Format: ####
+
+*From client:*
+```typescript
+  {
+    header: "UA",
+    id: Number
+  }
+```
+
+*From server:*
+```typescript
+  {
+    header: "UA",
+    area: Number
+  }
+```
+
+If sent by the client, uninvites the user `id`.
+See `IA` and `GA` for explanations of inviting and uninviting.
+
+If sent by the server, notifies the user that they are no longer
+considered invited in area `area`.    
+Do note that in this case, the uninviter's ID is not stated.
 
 [*Back to TOC*][toc]
 
