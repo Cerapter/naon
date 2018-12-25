@@ -126,7 +126,7 @@ case, the two versions should be one and the same.
 Sent in response to a `HI` packet. The server explains some basic
 details about itself.
 
-Most arguments are self-explanator, however, the `protection` argument
+Most arguments are self-explanatory, however, the `protection` argument
 can take three different values:
 - `0`: open. Anyone can join.
 - `1`: password or spectate. An user can only join as a player if they
@@ -567,7 +567,7 @@ and their arguments:
   No defaults.    
   Optional.    
   As with `emote`, invalid animations are to be displayed as a
-  "missigno", and be considered immediately finished, having no actual
+  'missigno', and be considered immediately finished, having no actual
   animation.
   - `stall: Boolean`: if `true`, the client should not continue
   interpreting the IC message further until the animation has played
@@ -589,7 +589,7 @@ and their arguments:
   No defaults.    
   An empty text `ICPiece` is not considered to exist, and should be 
   pruned from the IC message itself.
-  - `center: Boolean`: if `true`, the message will appear centered.    
+  - `center: Boolean`: if `true`, the message will appear centred.    
   If another `"text"` `ICPiece` appears later on, that has a `center`
   with the opposite value, that one is ignored.    
   The first `"text"` piece determines whether the entire text is
@@ -622,7 +622,7 @@ and their arguments:
 
     Notably, the red text colour is missing from this list. That is
     because it is neither used much in the original series, nor can it
-    fulfill its purpose of being a "threatening" mod colour due to the
+    fulfil its purpose of being a "threatening" mod colour due to the
     `"color_custom"` `ICPiece`.
 - `"color_custom"`
   - `color: String`: the colour of any following `"text"` `ICPiece`s,
@@ -632,8 +632,8 @@ and their arguments:
   If no `"text"` `ICPiece` appears after this piece, it should be 
   pruned from the IC message.
 - `"delay"`
-  - `time: Number`: the client should wait this much in miliseconds 
-  before continuing to interpet the IC message.    
+  - `time: Number`: the client should wait this much in milliseconds
+  before continuing to interpret the IC message.    
   No defaults.    
   Cannot be `0` or negative.    
   At least the server should do sanity checks here.
@@ -771,7 +771,7 @@ roleplay enhancing techniques all in one message.
 Further, the server sends back a similarly built packet, however, it
 may modify it in some ways.
 For example, some servers may filter out delays, or play jokes on the
-user's text messages (think disemvoweling and shaking).
+user's text messages (think disemvowelling and shaking).
 
 [*Back to TOC*][toc]
 
