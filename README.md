@@ -25,7 +25,9 @@ Websockets, and its messages will be JSON documents.
   - [`KK`](#user-content-kick-kk)
   - [`KB`](#user-content-ban-kb)
 - [Loading](#user-content-loading)
-  - [Downloading assets](#user-content-downloading-assets)
+  - [`AL`](#user-content-request-and-get-asset-id-list-al)
+  - [`AR`](#user-content-request-and-get-repository-list-ar)
+  - [`LR`](#user-content-loading-ready-lr)
 - [User profiles](#user-content-user-profiles)
   - [`SUP`](#user-content-set-user-profile-sup)
   - [`GUP`](#user-content-get-user-profiles-gup)
@@ -163,6 +165,7 @@ password, assuming it is passworded.
 ### Server join result: `JR` ###
 
 *Server -> Client*
+*Response:* `AL`
 
 #### Format: ####
 
@@ -303,11 +306,131 @@ Keeping the default value does not display a reason.
 
 ## Loading ##
 
+*Attorney Online 2.7* will use an asset system wherein it will the
+client that handles the downloading and unpacking of content upon
+joining a server, rather than the user manually doing so.    
+Of course, manual installation will still be possible, but should not
+be the preferred way of handling content.
+
+Anything that needs to be said on the matter is available in a bit
+more detail [here][ao2.7assets].
+
 [*Back to TOC*](#user-content-table-of-contents)
 
-### Downloading assets ###
+### Request and get asset ID list: `AL` ###
 
-*To be decided. I'm still not sure how we plan on handling assets.*
+*Client -> Server*    
+*Server -> Client*
+*Response (one or the other):* `AR`, `LR`
+
+#### Format: ####
+
+*From client:*
+```typescript
+{
+  header: "AL"
+}
+```
+
+*From server:*
+```typescript
+{
+  header: "AL",
+  ids: [
+    String,
+    String,
+    String,
+    ...
+  ]
+}
+```
+
+If sent by the client, requests the IDs of all used assets on the
+server.
+
+If sent by the server, returns said IDs.
+
+After the list has arrived back to the client, it should query its
+database to determine which assets are missing.
+
+It should then look for those missing assets in its currently
+registered repositories, and if they are not found, request the server
+for additional repository suggestions.
+
+If all assets can be found, signal to the server that the client is
+ready with the download.
+
+[*Back to TOC*](#user-content-table-of-contents)
+
+### Request and get repository list: `AR` ###
+
+*Client -> Server*    
+*Server -> Client*
+*Response:* `LR`
+
+#### Format: ####
+
+*From client:*
+```typescript
+{
+  header: "AR"
+}
+```
+
+*From server:*
+```typescript
+{
+  header: "AR",
+  repos: [
+    String,
+    String,
+    String,
+    ...
+  ]
+}
+```
+
+If sent by the client, the client could not find all the assets in
+its default repositories, and requests the server for others to
+look into.
+
+If sent by the server, returns the list of URLs to look into.
+
+The URLs can be of two kind:
+- "Big" repositories, which follow the format of `URL/assets` to get
+the asset list, and `URL/assets/{id}` to download a specific asset
+with a given ID.
+- "Mini" repositories, where instead the `URL` will point to a
+manifest file, that contains a list of asset IDs, and where to
+download them from.
+
+After the asset list has been obtained, the client should try to
+get all the assets. Should it fail to find some, it should alert the
+user so.
+
+Either way, when all possible assets are downloaded, the client should
+signal to the server that it is ready with the loading.
+
+[*Back to TOC*](#user-content-table-of-contents)
+
+### Loading ready: `LR` ###
+
+*Client -> Server*
+
+#### Format: ####
+
+```typescript
+  {
+    header: "LR"
+  }
+```
+
+Simply tells the server that the client has all the assets, or
+downloaded all the assets it could.
+
+In response to this, the server should "officially" add the client,
+putting them in the default area, and sending all the necessary
+info about the gamestate.
 
 [*Back to TOC*](#user-content-table-of-contents)
 
@@ -968,4 +1091,4 @@ left any.
 
 [ao2protocol]: https://github.com/AttorneyOnline/AO2Protocol/blob/master/Attorney%20Online%20Client-Server%20Network%20Specification.md
 [ao3protocol]: https://github.com/AttorneyOnline/AO3Protocol/blob/master/animated-chatroom-design.md
-[messagepack]: https://msgpack.org/
+[ao2.7assets]: https://gist.github.com/oldmud0/bdda25ebfc1ab4c68bb38b21585327f9

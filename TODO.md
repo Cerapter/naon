@@ -13,9 +13,11 @@
   - [x] Disconnect client (id, message)
   - [x] Kick (id, message)
   - [x] Ban (id, message, time)
-  - [ ] Request assets () **??????**
-  - [x] Get characters (more pages, Array(IPFS hashes))
-- User profiles
+  - [x] Request asset ID list ()
+  - [x] Get asset ID list (Array(id))
+  - [x] Request additional potential repos to look into ()
+  - [x] Get repos (Array(links))
+  - [x] Loading ready ()
   - [x] Set user profile (OOC name, description)
   - [x] Get user profiles (Array(id, OOC name, description, charid))
 - Game manipulation
