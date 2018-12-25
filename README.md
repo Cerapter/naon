@@ -52,7 +52,7 @@ Websockets, and its messages will be JSON documents.
 - **`...`:** the argument list continues with the pattern established
 before it.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ## Packet setup ##
 
@@ -63,11 +63,11 @@ Further, it should be noted that while in this document, the pieces of
 code are in TypeScript, this is only for easier readability -- the
 networking itself should JSON, as it has been said before.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ## Handshake ##
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Establishing connection: `HI` ###
 
@@ -104,7 +104,7 @@ limit or warn the joining client.
 Implicitly, Vanilla is most compatible with itself, so in Vanilla's
 case, the two versions should be one and the same.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Send server details: `SD` ###
 
@@ -135,7 +135,7 @@ However, they can choose to spectate if they do not know it.
 - `2`: password needed. The only way to join the server, player or
 spectator, is if the user knows the password.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Join server: `JS` ###
 
@@ -160,7 +160,7 @@ Else, it wants to join as a player.
 The `password` string contains the client's guess at the server's
 password, assuming it is passworded.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Server join result: `JR` ###
 
@@ -192,7 +192,7 @@ the result.
 Though only applicable with result `5`, nothing should stop the server
 from sending a message alongside any of the other results.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Disconnect: `DC` ###
 
@@ -229,7 +229,7 @@ disconnected"` if not specified or left empty.
 
 To actually force people to quit, see `KK` and `KB`.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Kick: `KK` ###
 
@@ -265,7 +265,7 @@ make sure to cease connection as well, to avoid trickery.
 In both cases, `message` is option, and defaults to `""`.
 Keeping the default value does not display a reason.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Ban: `KB` ###
 
@@ -302,7 +302,7 @@ Further, the server should keep the player from rejoining.
 In both cases, `message` is option, and defaults to `""`.
 Keeping the default value does not display a reason.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ## Loading ##
 
@@ -315,7 +315,7 @@ be the preferred way of handling content.
 Anything that needs to be said on the matter is available in a bit
 more detail [here][ao2.7assets].
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Request and get asset ID list: `AL` ###
 
@@ -360,7 +360,7 @@ for additional repository suggestions.
 If all assets can be found, signal to the server that the client is
 ready with the download.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Request and get repository list: `AR` ###
 
@@ -411,7 +411,7 @@ user so.
 Either way, when all possible assets are downloaded, the client should
 signal to the server that it is ready with the loading.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Loading ready: `LR` ###
 
@@ -432,7 +432,7 @@ In response to this, the server should "officially" add the client,
 putting them in the default area, and sending all the necessary
 info about the gamestate.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ## User profiles ##
 
@@ -453,7 +453,7 @@ User profiles can be presented like evidence or profiles in the
 whose profile was presented -- somewhat similar to callwords from
 pre-2.7 in function.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Set user profile: `SUP` ###
 
@@ -476,7 +476,7 @@ Both arguments are optional. If they are left out, or left empty
 (`""`), the server should assign the user a unique (server-wide) name,
 and the description "???".
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Get user profiles: `GUP` ###
 
@@ -492,16 +492,16 @@ and the description "???".
         id: Number,
         name: String,
         desc: String,
-        charid: Number
+        charid: Number,
+        area: Number
       },
       ...
     ]
   }
 ```
 
-Gives the client a list of user profiles from the server.    
-Can be used for both an area-wide user profile list, or a server-wide 
-user profile list.
+Gives the client a list of user profiles from the server, from all
+areas.
 
 If a client gets a `GUP` packet, it should delete all previously
 stored user profiles.
@@ -511,12 +511,13 @@ A `User Profile` consists of:
 - `name`: the user's OOC name.
 - `desc`: the user's description.
 - `charid`: the ID of the character the user is currently playing as.
+- `area`: the ID of the area this user is currently in.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ## Messaging ##
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### IC messages: `IC` ###
 
@@ -772,7 +773,7 @@ may modify it in some ways.
 For example, some servers may filter out delays, or play jokes on the
 user's text messages (think disemvoweling and shaking).
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### OOC messages: `CT` ###
 
@@ -825,11 +826,11 @@ Most commonly, these are the CMs.
 - `7`: jurors, for Jury cases.
 - `8`: witnesses, for Improv cases.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ## In-game ##
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Change character: `CC` ###
 
@@ -854,7 +855,7 @@ contain the characters.
 To force specific clients into specific characters, all the server has
 to do is give out user profiles that contain the changes.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Music: `MC` ###
 
@@ -888,7 +889,7 @@ already playing results in stopping the music.
 If `fade` was set to `true` when this was done, the music also fades
 out into silence.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Change background: `BG` ###
 
@@ -910,7 +911,7 @@ one given by name in `bg`.
 If sent by the server, orders the clients to change the background
 locally to the one given in `bg`.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Pair up request: `PR` ###
 
@@ -935,7 +936,7 @@ new pair never accepts the request.
 If sent by the server, it alerts the target client of a request to
 pair up by `id`.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Get list of pairs: `PL` ###
 
@@ -963,7 +964,7 @@ that is, pairs are commutative.
 Getting a list of pairs should clear the list already existing on
 the client.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Check character availability: `CA` ###
 
@@ -999,7 +1000,7 @@ available.
 If `free` at a given index is `true`, then the character with that 
 ID is available, else it is false.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Keep alive: `CH` ###
 
@@ -1016,7 +1017,7 @@ ID is available, else it is false.
 
 A simple check that connection is still established.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Login as moderator: `MD` ###
 
@@ -1050,7 +1051,7 @@ where `result` is:
 - `1`: incorrect password.
 - `2`: too many attempts.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 ### Call moderator: `ZZ` ###
 
@@ -1087,8 +1088,9 @@ a mod, the user will be alerted, and will be given the caller user's
 `id`, the ID of the `area` they called from, and the `message` if they
 left any.
 
-[*Back to TOC*](#user-content-table-of-contents)
+[*Back to TOC*][toc]
 
 [ao2protocol]: https://github.com/AttorneyOnline/AO2Protocol/blob/master/Attorney%20Online%20Client-Server%20Network%20Specification.md
 [ao3protocol]: https://github.com/AttorneyOnline/AO3Protocol/blob/master/animated-chatroom-design.md
 [ao2.7assets]: https://gist.github.com/oldmud0/bdda25ebfc1ab4c68bb38b21585327f9
+[toc]: #user-content-table-of-contents
